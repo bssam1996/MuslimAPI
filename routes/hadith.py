@@ -17,10 +17,9 @@ async def read_items():
 
 @router.get("/get_random_hadith")
 async def get_random_hadith():
-    hadith_name = random.choice(LIST_OF_HADITH_BOOKS)
     hadiths = []
     data = {}
-    with open(f"data/hadith/{hadith_name}/data.json", encoding="utf8") as f:
+    with open(f"data/hadith/random/data.json", encoding="utf8") as f:
         f = f.read()
         data = json.loads(f)
         hadiths = data["hadiths"]

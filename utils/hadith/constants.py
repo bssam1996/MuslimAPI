@@ -1,0 +1,1 @@
+DORAR_API_LINK = "https://dorar.net/dorar_api.json"

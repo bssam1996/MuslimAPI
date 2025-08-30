@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+# from .routes.hadith import hadith
 import routes.hadith as hadith
 
 app = FastAPI(

@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 # from .routes.hadith import hadith
 import routes.hadith as hadith
 
+ALLOWED_ORIGINS = ["https://bssam1996.github.io","*"]
 app = FastAPI(
     title="Muslim API",
     description="An API for Muslim resources",
@@ -11,7 +12,7 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://bssam1996.github.io","*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

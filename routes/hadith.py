@@ -27,7 +27,7 @@ async def get_random_hadith():
     if len(hadiths) == 0:
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": "No hadiths found"})
     data = random.choice(hadiths)
-    return JSONResponse(status_code=status.HTTP_200_OK, content=data)
+    return JSONResponse(status_code=status.HTTP_200_OK, content=data, headers={"Access-Control-Allow-Origin": "*"})
 
 @router.get("/find_hadith")
 async def find_hadith(searchQuery: str):

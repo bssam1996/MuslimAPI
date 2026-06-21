@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 # from .routes.hadith import hadith
 import routes.hadith as hadith
 
+
 ALLOWED_ORIGINS = ["https://bssam1996.github.io","*"]
 app = FastAPI(
     title="Muslim API",

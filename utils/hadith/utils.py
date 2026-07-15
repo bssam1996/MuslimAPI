@@ -1,5 +1,5 @@
 import requests
-from .constants import DORAR_API_LINK
+from .constants import DORAR_API_LINK, DORAR_HEADERS
 import json, re
 from scrapy.selector import Selector
 
@@ -21,7 +21,7 @@ def generateEmptyResponse():
 
 def getSimilarHadiths(query: str) -> dict:
     try:
-        r = requests.get(DORAR_API_LINK, params={"skey": query})
+        r = requests.get(DORAR_API_LINK, params={"skey": query}, headers=DORAR_HEADERS)
         if r.status_code != 200:
             print(f"Error: Received status code {r.status_code} from Dorar API")
             return {}

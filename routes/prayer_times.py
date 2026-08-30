@@ -16,6 +16,7 @@ from utils.prayer_times.engine import (
     calculate_prayer_times,
     public_methods,
 )
+from utils.prayer_times.hijri import hijri_payload
 from utils.prayer_times.timezone import TimezoneResolutionError, resolve_timezone
 
 
@@ -126,7 +127,7 @@ def _date_payload(on_date: Date, result) -> dict:
             "month": {"number": on_date.month, "en": on_date.strftime("%B")},
             "year": str(on_date.year),
         },
-        "hijri": None,
+        "hijri": hijri_payload(on_date),
     }
 
 

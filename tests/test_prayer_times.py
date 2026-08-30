@@ -87,6 +87,8 @@ def test_daily_route_returns_an_aladhan_style_envelope_and_cache_policy():
     assert body["code"] == 200
     assert body["status"] == "OK"
     assert body["data"]["timings"]["Fajr"] == "04:03"
+    assert body["data"]["date"]["hijri"]["date"] == "17-03-1448"
+    assert body["data"]["date"]["hijri"]["month"]["en"] == "Rabi' al-Awwal"
     assert response.headers["vercel-cdn-cache-control"] == "public, s-maxage=86400"
 
 

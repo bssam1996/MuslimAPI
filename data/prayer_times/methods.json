@@ -1,0 +1,28 @@
+{
+  "version": "aladhan-methods-2026-08-30",
+  "methods": [
+    {"id": 0, "key": "JAFARI", "name": "Shia Ithna-Ashari, Leva Institute, Qum", "fajr_angle": 16.0, "maghrib_angle": 4.0, "isha_angle": 14.0, "midnight_mode": "JAFARI"},
+    {"id": 1, "key": "KARACHI", "name": "University of Islamic Sciences, Karachi", "fajr_angle": 18.0, "isha_angle": 18.0},
+    {"id": 2, "key": "ISNA", "name": "Islamic Society of North America (ISNA)", "fajr_angle": 15.0, "isha_angle": 15.0},
+    {"id": 3, "key": "MWL", "name": "Muslim World League", "fajr_angle": 18.0, "isha_angle": 17.0},
+    {"id": 4, "key": "MAKKAH", "name": "Umm Al-Qura University, Makkah", "fajr_angle": 18.5, "isha_interval": 90},
+    {"id": 5, "key": "EGYPT", "name": "Egyptian General Authority of Survey", "fajr_angle": 19.5, "isha_angle": 17.5},
+    {"id": 7, "key": "TEHRAN", "name": "Institute of Geophysics, University of Tehran", "fajr_angle": 17.7, "maghrib_angle": 4.5, "isha_angle": 14.0, "midnight_mode": "JAFARI"},
+    {"id": 8, "key": "GULF", "name": "Gulf Region", "fajr_angle": 19.5, "isha_interval": 90},
+    {"id": 9, "key": "KUWAIT", "name": "Kuwait", "fajr_angle": 18.0, "isha_angle": 17.5},
+    {"id": 10, "key": "QATAR", "name": "Qatar", "fajr_angle": 18.0, "isha_interval": 90},
+    {"id": 11, "key": "SINGAPORE", "name": "Majlis Ugama Islam Singapura, Singapore", "fajr_angle": 20.0, "isha_angle": 18.0},
+    {"id": 12, "key": "FRANCE", "name": "Union Organization Islamic de France", "fajr_angle": 12.0, "isha_angle": 12.0},
+    {"id": 13, "key": "TURKEY", "name": "Diyanet İşleri Başkanlığı, Turkey (experimental)", "fajr_angle": 18.0, "isha_angle": 17.0},
+    {"id": 14, "key": "RUSSIA", "name": "Spiritual Administration of Muslims of Russia", "fajr_angle": 16.0, "isha_angle": 15.0},
+    {"id": 15, "key": "MOONSIGHTING", "name": "Moonsighting Committee Worldwide (Moonsighting.com)", "fajr_angle": 18.0, "isha_angle": 18.0, "moonsighting": true},
+    {"id": 16, "key": "DUBAI", "name": "Dubai (experimental)", "fajr_angle": 18.2, "isha_angle": 18.2},
+    {"id": 17, "key": "JAKIM", "name": "Jabatan Kemajuan Islam Malaysia (JAKIM)", "fajr_angle": 20.0, "isha_angle": 18.0},
+    {"id": 18, "key": "TUNISIA", "name": "Tunisia", "fajr_angle": 18.0, "isha_angle": 18.0},
+    {"id": 19, "key": "ALGERIA", "name": "Algeria", "fajr_angle": 18.0, "isha_angle": 17.0},
+    {"id": 20, "key": "KEMENAG", "name": "Kementerian Agama Republik Indonesia", "fajr_angle": 20.0, "isha_angle": 18.0},
+    {"id": 21, "key": "MOROCCO", "name": "Morocco", "fajr_angle": 19.0, "isha_angle": 17.0},
+    {"id": 22, "key": "PORTUGAL", "name": "Comunidade Islamica de Lisboa", "fajr_angle": 18.0, "maghrib_interval": 3, "isha_interval": 77},
+    {"id": 23, "key": "JORDAN", "name": "Ministry of Awqaf, Islamic Affairs and Holy Places, Jordan", "fajr_angle": 18.0, "maghrib_interval": 5, "isha_angle": 18.0}
+  ]
+}

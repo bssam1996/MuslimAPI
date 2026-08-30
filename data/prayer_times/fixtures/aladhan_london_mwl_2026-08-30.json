@@ -1,0 +1,25 @@
+{
+  "source": "https://api.aladhan.com/v1/timings/30-08-2026?latitude=51.5072&longitude=-0.1276&method=3&timezonestring=Europe%2FLondon",
+  "retrieved_at": "2026-08-30",
+  "purpose": "Strict formatted-minute parity fixture for the coordinate daily route.",
+  "request": {
+    "date": "2026-08-30",
+    "latitude": 51.5072,
+    "longitude": -0.1276,
+    "method": 3,
+    "timezonestring": "Europe/London"
+  },
+  "timings": {
+    "Imsak": "03:53",
+    "Fajr": "04:03",
+    "Sunrise": "06:10",
+    "Dhuhr": "13:01",
+    "Asr": "16:47",
+    "Sunset": "19:51",
+    "Maghrib": "19:51",
+    "Isha": "21:49",
+    "Midnight": "01:01",
+    "Firstthird": "23:18",
+    "Lastthird": "02:44"
+  }
+}

@@ -14,6 +14,8 @@ defusedxml==0.7.1
 dnspython==2.7.0
 email_validator==2.2.0
 fastapi==0.116.1
+timezonefinder==8.3.0
+tzdata==2025.2
 fastapi-cli==0.0.8
 fastapi-cloud-cli==0.1.5
 filelock==3.19.1

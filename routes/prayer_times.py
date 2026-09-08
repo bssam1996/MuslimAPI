@@ -17,6 +17,7 @@ from utils.prayer_times.engine import (
     public_methods,
 )
 from utils.prayer_times.hijri import hijri_payload
+from utils.prayer_times.location_method import default_method_for_coordinates
 from utils.prayer_times.timezone import TimezoneResolutionError, resolve_timezone
 
 
@@ -87,15 +88,26 @@ def _request_from_values(
 ) -> CalculationRequest:
     parsed_latitude = _float("latitude", latitude)
     parsed_longitude = _float("longitude", longitude)
+    if not -90 <= parsed_latitude <= 90 or not -180 <= parsed_longitude <= 180:
+        raise PrayerRequestError("latitude or longitude is outside its valid range")
     parsed_timezone_name = timezone_name or None
-    parsed_method = _integer("method", method, 3)
+    parsed_method = _integer("method", method)
     parsed_school = _integer("school", school, 0)
     parsed_latitude_adjustment = _integer("latitudeAdjustmentMethod", latitude_adjustment_method, 3)
+    if parsed_method is None:
+        method_resolution = default_method_for_coordinates(parsed_latitude, parsed_longitude)
+        selected_method = method_resolution.method
+        method_selection = method_resolution.selection
+        resolution_metadata = method_resolution.metadata()
+    else:
+        selected_method = parsed_method
+        method_selection = "explicit"
+        resolution_metadata = None
     return CalculationRequest(
         on_date=_parse_date(date_value, parsed_latitude, parsed_longitude, parsed_timezone_name),
         latitude=parsed_latitude,
         longitude=parsed_longitude,
-        method=3 if parsed_method is None else parsed_method,
+        method=selected_method,
         school=0 if parsed_school is None else parsed_school,
         shafaq=(shafaq or "general").lower(),
         tune=_parse_tune(tune),
@@ -103,6 +115,8 @@ def _request_from_values(
         latitude_adjustment_method=3 if parsed_latitude_adjustment is None else parsed_latitude_adjustment,
         timezone_name=parsed_timezone_name,
         method_settings=method_settings,
+        method_selection=method_selection,
+        method_resolution=resolution_metadata,
     )
 
 

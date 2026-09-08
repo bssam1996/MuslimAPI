@@ -118,6 +118,8 @@ class CalculationRequest:
     latitude_adjustment_method: int = 3
     timezone_name: str | None = None
     method_settings: str | None = None
+    method_selection: str = "explicit"
+    method_resolution: dict[str, str] | None = None
 
 
 @dataclass(frozen=True)
@@ -484,6 +486,7 @@ def calculate_prayer_times(request: CalculationRequest) -> PrayerTimesResult:
         "timezone": timezone_name,
         "timezoneSource": timezone_source,
         "method": {"id": method.id, "name": method.name, "params": method.public_params()},
+        "methodSelection": request.method_selection,
         "school": "Hanafi" if request.school else "Shafi",
         "midnightMode": "JAFARI" if midnight_mode else "STANDARD",
         "latitudeAdjustmentMethod": request.latitude_adjustment_method,
@@ -494,4 +497,6 @@ def calculate_prayer_times(request: CalculationRequest) -> PrayerTimesResult:
         "methodRegistryVersion": registry_version,
         "adhanReference": ADHAN_REFERENCE,
     }
+    if request.method_resolution:
+        metadata["methodResolution"] = request.method_resolution
     return PrayerTimesResult(timings, metadata, resolved_latitude)

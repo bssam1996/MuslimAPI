@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from routes.prayer_times import router
 from utils.prayer_times.engine import CalculationRequest, calculate_prayer_times, public_methods
+from utils.prayer_times.location_method import default_method_for_coordinates
 
 
 def client() -> TestClient:
@@ -74,6 +75,42 @@ def test_methods_endpoint_exposes_published_and_custom_methods():
     assert methods["MWL"]["id"] == 3
     assert methods["JORDAN"]["id"] == 23
     assert methods["CUSTOM"] == {"id": 99}
+
+
+def test_alexandria_uses_the_egypt_authority_when_method_is_omitted():
+    resolution = default_method_for_coordinates(31.2001, 29.9187)
+
+    assert resolution.method == 5
+    assert resolution.selection == "location_default"
+    assert resolution.region == "Egypt"
+
+    response = client().get(
+        "/v1/timings/30-08-2026",
+        params={"latitude": "31.2001", "longitude": "29.9187"},
+    )
+
+    assert response.status_code == 200
+    metadata = response.json()["data"]["meta"]
+    assert metadata["method"]["id"] == 5
+    assert metadata["methodSelection"] == "location_default"
+    assert metadata["methodResolution"] == {
+        "selection": "location_default",
+        "timezone": "Africa/Cairo",
+        "region": "Egypt",
+    }
+
+
+def test_explicit_method_overrides_the_location_default():
+    response = client().get(
+        "/v1/timings/30-08-2026",
+        params={"latitude": "31.2001", "longitude": "29.9187", "method": "3"},
+    )
+
+    assert response.status_code == 200
+    metadata = response.json()["data"]["meta"]
+    assert metadata["method"]["id"] == 3
+    assert metadata["methodSelection"] == "explicit"
+    assert "methodResolution" not in metadata
 
 
 def test_daily_route_returns_an_aladhan_style_envelope_and_cache_policy():

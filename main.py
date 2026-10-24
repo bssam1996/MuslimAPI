@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 import routes.hadith as hadith
 import routes.quizes as quizes
 import routes.prayer_times as prayer_times
+from utils.web_push import create_app as create_push_app
 
 
 ALLOWED_ORIGINS = ["https://bssam1996.github.io","*"]
@@ -25,6 +26,7 @@ app.add_middleware(
 app.include_router(hadith.router)
 app.include_router(quizes.router)
 app.include_router(prayer_times.router)
+app.mount('/web-push', create_push_app())
 
 @app.get("/")
 async def root():

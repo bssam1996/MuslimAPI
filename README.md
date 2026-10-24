@@ -5,6 +5,9 @@ monthly prayer calendars, calculation-method metadata, a random Hadith/search
 interface, and Arabic Islamic quiz content. It is designed for the Muslim
 Flutter app, but its HTTP endpoints can be used by any client.
 
+Web Push prayer reminders are available at `/web-push` after configuring
+durable storage, VAPID keys and a minute scheduler. See [WEB_PUSH.md](WEB_PUSH.md).
+
 ## Features
 
 - Offline, deterministic prayer-time calculation from latitude and longitude.

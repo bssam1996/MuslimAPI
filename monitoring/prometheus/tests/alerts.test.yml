@@ -1,0 +1,47 @@
+rule_files:
+  - ../alerts.yml
+evaluation_interval: 1m
+tests:
+  - name: API unavailable for two minutes
+    interval: 1m
+    input_series:
+      - series: 'up{job="muslim-api",instance="api:8000"}'
+        values: '1 1 1 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: MuslimAPIDown
+        exp_alerts:
+          - exp_labels:
+              job: muslim-api
+              instance: api:8000
+              severity: critical
+            exp_annotations:
+              summary: MuslimAPI cannot be scraped
+              description: Check the API container, its /metrics endpoint, and the Docker network.
+
+  - name: Sparse errors do not trigger the high-error-rate alert
+    interval: 1m
+    input_series:
+      - series: 'muslim_api_http_requests_total{job="muslim-api",route="/v1/methods",status="500"}'
+        values: '0+1x20'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: MuslimAPIHighServerErrorRate
+        exp_alerts: []
+
+  - name: Sustained server errors at meaningful traffic trigger an alert
+    interval: 1m
+    input_series:
+      - series: 'muslim_api_http_requests_total{job="muslim-api",route="/v1/methods",status="200"}'
+        values: '0+90x20'
+      - series: 'muslim_api_http_requests_total{job="muslim-api",route="/v1/methods",status="500"}'
+        values: '0+10x20'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: MuslimAPIHighServerErrorRate
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              summary: More than 5% of API requests are failing with HTTP 5xx
+              description: Inspect error counts and function errors in the MuslimAPI dashboard.

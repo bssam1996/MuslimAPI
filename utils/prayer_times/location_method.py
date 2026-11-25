@@ -8,6 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from .timezone import resolve_timezone
+from utils.metrics import metrics
 
 
 @dataclass(frozen=True)
@@ -26,12 +27,14 @@ class MethodResolution:
         return response
 
 
+@metrics.track_function
 @lru_cache(maxsize=1)
 def _location_defaults() -> dict:
     path = Path(__file__).resolve().parents[2] / "data" / "prayer_times" / "location_defaults.json"
     return json.loads(path.read_text(encoding="utf8"))
 
 
+@metrics.track_function
 def default_method_for_coordinates(latitude: float, longitude: float) -> MethodResolution:
     """Return the configured authority for the location, or MWL as fallback.
 

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
+from utils.metrics import metrics
 
 
 router = APIRouter(
@@ -14,6 +15,7 @@ router = APIRouter(
 QUIZ_DATA_FILE = Path(__file__).resolve().parents[1] / "data" / "quizes" / "quizes.json"
 
 
+@metrics.track_function
 def load_quizes():
     with QUIZ_DATA_FILE.open(encoding="utf8") as file:
         data = json.load(file)
@@ -21,11 +23,13 @@ def load_quizes():
 
 
 @router.get("/")
+@metrics.track_function
 async def read_items():
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Quizes route works!"})
 
 
 @router.get("/get_random_quiz")
+@metrics.track_function
 async def get_random_quiz():
     quizes = load_quizes()
     if len(quizes) == 0:
@@ -36,5 +40,6 @@ async def get_random_quiz():
 
 
 @router.get("/get_random_question")
+@metrics.track_function
 async def get_random_question():
     return await get_random_quiz()

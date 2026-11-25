@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from .timezone import resolve_timezone
+from utils.metrics import metrics
 
 
 ENGINE_VERSION = "adhan-python-port-1"
@@ -69,6 +70,7 @@ class Method:
         return params
 
 
+@metrics.track_function
 @lru_cache(maxsize=1)
 def methods() -> tuple[dict[int, Method], str]:
     path = Path(__file__).resolve().parents[2] / "data" / "prayer_times" / "methods.json"
@@ -91,6 +93,7 @@ def methods() -> tuple[dict[int, Method], str]:
     return loaded, raw["version"]
 
 
+@metrics.track_function
 def public_methods() -> dict[str, Any]:
     registry, _ = methods()
     response = {
@@ -396,6 +399,7 @@ def _method_for_request(request: CalculationRequest) -> Method:
     return method
 
 
+@metrics.track_function
 def calculate_prayer_times(request: CalculationRequest) -> PrayerTimesResult:
     if not -90 <= request.latitude <= 90 or not -180 <= request.longitude <= 180:
         raise CalculationError("latitude or longitude is outside its valid range")

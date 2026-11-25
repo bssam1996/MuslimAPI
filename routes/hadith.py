@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 import json
 import random
 from utils.hadith import utils as hadith_utils
+from utils.metrics import metrics
 
 router = APIRouter(
     prefix="/hadith",
@@ -13,10 +14,12 @@ LIST_OF_HADITH_BOOKS = [
     "muslim"
 ]
 @router.get("/")
+@metrics.track_function
 async def read_items():
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Hadith route works!"})
 
 @router.get("/get_random_hadith")
+@metrics.track_function
 async def get_random_hadith():
     hadiths = []
     data = {}
@@ -30,6 +33,7 @@ async def get_random_hadith():
     return JSONResponse(status_code=status.HTTP_200_OK, content=data, headers={"Access-Control-Allow-Origin": "*"})
 
 @router.get("/find_hadith")
+@metrics.track_function
 async def find_hadith(searchQuery: str):
     if searchQuery == "":
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": "Search query cannot be empty"})

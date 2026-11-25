@@ -46,6 +46,20 @@ GitHub Actions tests the image and publishes AMD64/ARM64 images to
 `ghcr.io/bssam1996/muslimapi` on pushes to `master` and version tags. See
 [DOCKER.md](DOCKER.md) for GHCR setup, hosting on a mini PC, and local builds.
 
+## Monitoring
+
+`GET /metrics` exports Prometheus request and function duration histograms,
+success/error counters, dependency timings, and Python process metrics. The
+optional [monitoring stack](MONITORING.md) adds persistent Prometheus storage,
+a provisioned Grafana dashboard, and alert rules:
+
+```sh
+# Set GRAFANA_ADMIN_PASSWORD in .env first.
+docker compose -f compose.yaml -f compose.monitoring.yaml up -d
+```
+
+Grafana is available at `http://localhost:3000`.
+
 ## API overview
 
 | Endpoint | Description |

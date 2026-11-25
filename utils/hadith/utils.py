@@ -2,6 +2,7 @@ import requests
 from .constants import DORAR_API_LINK, DORAR_HEADERS
 import json, re
 from scrapy.selector import Selector
+from utils.metrics import metrics
 
 def parseHadith():
     pass
@@ -19,19 +20,22 @@ def generateEmptyResponse():
         }
     }
 
+@metrics.track_function(failure_predicate=lambda result: not result)
 def getSimilarHadiths(query: str) -> dict:
     try:
-        r = requests.get(DORAR_API_LINK, params={"skey": query}, headers=DORAR_HEADERS)
-        if r.status_code != 200:
-            print(f"Error: Received status code {r.status_code} from Dorar API")
-            return {}
-        data = r.json()
-        return data
+        with metrics.external_call("dorar", "GET") as call:
+            r = requests.get(DORAR_API_LINK, params={"skey": query}, headers=DORAR_HEADERS, timeout=(3.05, 10))
+            call.status = r.status_code
+            if r.status_code != 200:
+                return {}
+            return r.json()
             
-    except Exception as e:
-        print(f"Something went wrong while getting similar hadiths: {str(e)}")
+    except Exception as error:
+        # Exception messages may include the user's search query in the URL.
+        print(f"Dorar API request failed: {type(error).__name__}")
         return {}
 
+@metrics.track_function
 def cleanSimilarHadithResults(results: str) -> list:
     if results is None or results.strip() == "":
         return []
@@ -99,6 +103,7 @@ def clean_arabic_text(text):
     
     return text
 
+@metrics.track_function
 def reformatHadithResults(ahadiths: list, info: list):
     if ahadiths is None or info is None or len(ahadiths) == 0 or len(info) == 0 or len(ahadiths) != len(info):
         return []

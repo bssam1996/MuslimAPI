@@ -58,6 +58,10 @@ jobs:
               ):
                   response = client.get(path)
                   assert response.status_code == 200, (path, response.text)
+              response = client.get("/metrics")
+              assert response.status_code == 200
+              assert "muslim_api_http_request_duration_seconds_bucket" in response.text
+              assert "muslim_api_function_duration_seconds_bucket" in response.text
           PY
 
       - name: Run tests inside the image
@@ -66,6 +70,22 @@ jobs:
             --mount "type=bind,source=$GITHUB_WORKSPACE,target=/source,readonly" \
             --workdir /source muslim-api:ci \
             sh -c 'pip install --quiet --disable-pip-version-check pytest && python -m pytest -q -p no:cacheprovider'
+
+      - name: Validate monitoring configuration and alert rules
+        env:
+          GRAFANA_ADMIN_PASSWORD: ci-configuration-validation-only
+        run: |
+          docker compose -f compose.yaml -f compose.monitoring.yaml config --quiet
+          docker run --rm \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/monitoring/prometheus,target=/etc/prometheus,readonly" \
+            --entrypoint promtool prom/prometheus:v3.16.0 check config /etc/prometheus/prometheus.yml
+          docker run --rm \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/monitoring/host-network/prometheus.yml,target=/etc/prometheus/prometheus.yml,readonly" \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/monitoring/prometheus/alerts.yml,target=/etc/prometheus/alerts.yml,readonly" \
+            --entrypoint promtool prom/prometheus:v3.16.0 check config /etc/prometheus/prometheus.yml
+          docker run --rm \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/monitoring/prometheus,target=/etc/prometheus,readonly" \
+            --entrypoint promtool prom/prometheus:v3.16.0 test rules /etc/prometheus/tests/alerts.test.yml
 
   publish:
     name: Publish to GHCR

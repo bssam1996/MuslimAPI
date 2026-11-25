@@ -1,9 +1,11 @@
 """Offline coordinate-to-timezone resolution for prayer calculations."""
 
+
 from functools import lru_cache
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from timezonefinder import TimezoneFinder
+from utils.metrics import metrics
 
 
 class TimezoneResolutionError(ValueError):
@@ -13,6 +15,7 @@ class TimezoneResolutionError(ValueError):
 _finder = TimezoneFinder(in_memory=False)
 
 
+@metrics.track_function
 @lru_cache(maxsize=4096)
 def resolve_timezone(latitude: float, longitude: float, override: str | None = None) -> tuple[ZoneInfo, str, str]:
     """Return a ZoneInfo, canonical name, and source for coordinates.

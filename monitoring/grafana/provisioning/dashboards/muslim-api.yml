@@ -1,0 +1,11 @@
+apiVersion: 1
+providers:
+  - name: MuslimAPI
+    orgId: 1
+    folder: MuslimAPI
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards

@@ -1,0 +1,68 @@
+groups:
+  - name: muslim-api
+    rules:
+      - alert: MuslimAPIDown
+        expr: up{job="muslim-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: MuslimAPI cannot be scraped
+          description: Check the API container, its /metrics endpoint, and the Docker network.
+
+      - alert: MuslimAPIHighServerErrorRate
+        expr: |
+          (sum(rate(muslim_api_http_requests_total{job="muslim-api",status=~"5..",route!="/"}[5m]))
+          / sum(rate(muslim_api_http_requests_total{job="muslim-api",route!="/"}[5m]))) > 0.05
+          and sum(increase(muslim_api_http_requests_total{job="muslim-api",route!="/"}[5m])) >= 20
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: More than 5% of API requests are failing with HTTP 5xx
+          description: Inspect error counts and function errors in the MuslimAPI dashboard.
+
+      - alert: MuslimAPIHighLatency
+        expr: |
+          histogram_quantile(0.95, sum by (le, route) (
+            rate(muslim_api_http_request_duration_seconds_bucket{job="muslim-api",route!="/"}[5m])
+          )) > 1
+          and on (route) sum by (route) (
+            increase(muslim_api_http_requests_total{job="muslim-api",route!="/"}[5m])
+          ) >= 20
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: API p95 latency is above one second
+          description: Compare endpoint, function, and Dorar latency to identify the slow operation.
+
+      - alert: MuslimAPIEventLoopBlocked
+        expr: muslim_api_event_loop_lag_seconds{job="muslim-api"} > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: The API event loop is persistently delayed
+          description: Synchronous work or outbound HTTP may be blocking async requests.
+
+      - alert: MuslimAPIHighMemory
+        expr: process_resident_memory_bytes{job="muslim-api"} > 536870912
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: API process resident memory exceeds 512 MiB
+          description: Review memory growth and adjust this threshold to your mini PC's capacity.
+
+      - alert: MuslimAPIDorarFailures
+        expr: |
+          sum(rate(muslim_api_external_request_duration_seconds_count{job="muslim-api",service="dorar",outcome="error"}[5m]))
+          / sum(rate(muslim_api_external_request_duration_seconds_count{job="muslim-api",service="dorar"}[5m])) > 0.5
+          and sum(increase(muslim_api_external_request_duration_seconds_count{job="muslim-api",service="dorar"}[5m])) >= 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: More than half of Dorar calls are failing
+          description: Hadith search may return HTTP 404 while the upstream service is failing; inspect dependency errors.

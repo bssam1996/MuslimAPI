@@ -19,6 +19,7 @@ from utils.prayer_times.engine import (
 from utils.prayer_times.hijri import hijri_payload
 from utils.prayer_times.location_method import default_method_for_coordinates
 from utils.prayer_times.timezone import TimezoneResolutionError, resolve_timezone
+from utils.metrics import metrics
 
 
 router = APIRouter(prefix="/v1", tags=["Prayer Times"])
@@ -28,10 +29,12 @@ class PrayerRequestError(ValueError):
     """A request is syntactically valid HTTP but invalid for this API."""
 
 
+@metrics.track_function
 def _error(message: str, status_code: int = 400) -> JSONResponse:
     return JSONResponse(status_code=status_code, content={"code": status_code, "status": "BAD_REQUEST", "data": {"message": message}})
 
 
+@metrics.track_function
 def _parse_date(value: str, latitude: float, longitude: float, timezone_name: str | None) -> Date:
     if value.lower() == "today":
         timezone_info, _, _ = resolve_timezone(latitude, longitude, timezone_name)
@@ -42,6 +45,7 @@ def _parse_date(value: str, latitude: float, longitude: float, timezone_name: st
         raise PrayerRequestError("date must be DD-MM-YYYY or today") from exc
 
 
+@metrics.track_function
 def _float(name: str, value: str | None) -> float:
     if value is None or value == "":
         raise PrayerRequestError(f"{name} is required")
@@ -51,6 +55,7 @@ def _float(name: str, value: str | None) -> float:
         raise PrayerRequestError(f"{name} must be a number") from exc
 
 
+@metrics.track_function
 def _integer(name: str, value: str | None, default: int | None = None) -> int | None:
     if value is None or value == "":
         return default
@@ -60,6 +65,7 @@ def _integer(name: str, value: str | None, default: int | None = None) -> int | 
         raise PrayerRequestError(f"{name} must be an integer") from exc
 
 
+@metrics.track_function
 def _parse_tune(value: str | None) -> tuple[int, ...]:
     if not value:
         return (0,) * len(TUNE_NAMES)
@@ -73,6 +79,7 @@ def _parse_tune(value: str | None) -> tuple[int, ...]:
     return offsets + (0,) * (len(TUNE_NAMES) - len(offsets))
 
 
+@metrics.track_function
 def _request_from_values(
     date_value: str,
     latitude: str | None,
@@ -120,6 +127,7 @@ def _request_from_values(
     )
 
 
+@metrics.track_function
 def _headers() -> dict[str, str]:
     # Prayer times are deterministic for a complete path/query.  Browser caching
     # remains short, while Vercel's CDN absorbs repeated public requests.
@@ -129,6 +137,7 @@ def _headers() -> dict[str, str]:
     }
 
 
+@metrics.track_function
 def _date_payload(on_date: Date, result) -> dict:
     return {
         "readable": on_date.strftime("%d %b %Y"),
@@ -145,16 +154,19 @@ def _date_payload(on_date: Date, result) -> dict:
     }
 
 
+@metrics.track_function
 def _payload(on_date: Date, result) -> dict:
     return {"timings": result.timings, "date": _date_payload(on_date, result), "meta": result.metadata}
 
 
 @router.get("/methods")
+@metrics.track_function
 async def get_methods():
     return JSONResponse(status_code=200, content={"code": 200, "status": "OK", "data": public_methods()}, headers=_headers())
 
 
 @router.get("/timings/{date_value}")
+@metrics.track_function
 async def get_timings(
     date_value: str,
     latitude: str | None = None,
@@ -180,6 +192,7 @@ async def get_timings(
 
 
 @router.get("/calendar/{year}/{month}")
+@metrics.track_function
 async def get_calendar(
     year: int,
     month: int,

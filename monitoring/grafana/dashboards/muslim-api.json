@@ -1,0 +1,1290 @@
+{
+  "uid": "muslim-api",
+  "title": "MuslimAPI Overview",
+  "tags": [
+    "muslim-api",
+    "prometheus"
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "timezone": "browser",
+  "refresh": "15s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "editable": false,
+  "description": "HTTP and function latency, outcomes, dependency health and Python process metrics. Root health probes and /metrics scrapes are excluded from traffic/latency panels.",
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "options": [],
+        "multi": false,
+        "includeAll": false,
+        "current": {}
+      },
+      {
+        "name": "route",
+        "label": "Endpoint",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "query": {
+          "query": "label_values(muslim_api_http_requests_total{job=\"muslim-api\"}, route)",
+          "refId": "route"
+        },
+        "refresh": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": []
+      },
+      {
+        "name": "function",
+        "label": "Function",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "query": {
+          "query": "label_values(muslim_api_function_calls_total{job=\"muslim-api\"}, function)",
+          "refId": "function"
+        },
+        "refresh": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": []
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "API scrape health",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up{job=\"muslim-api\"}",
+          "legendFormat": "API up",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "description": "1 = Prometheus can scrape the API. This is not an external end-to-end availability probe."
+    },
+    {
+      "id": 2,
+      "title": "Requests / second",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(sum(rate(muslim_api_http_requests_total{job=\"muslim-api\",route!=\"/\",route=~\"$route\"}[$__rate_interval]))) or vector(0)",
+          "legendFormat": "Requests/s",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Server error ratio (HTTP 5xx)",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(((sum(rate(muslim_api_http_requests_total{job=\"muslim-api\",route!=\"/\",status=~\"5..\",route=~\"$route\"}[$__rate_interval]))) or vector(0)) / clamp_min(sum(rate(muslim_api_http_requests_total{job=\"muslim-api\",route!=\"/\",route=~\"$route\"}[$__rate_interval])), 1e-9)) or vector(0)",
+          "legendFormat": "5xx ratio",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Requests in progress",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "muslim_api_http_requests_in_progress{job=\"muslim-api\"}",
+          "legendFormat": "Active",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 5,
+      "title": "HTTP latency p50 / p95 / p99",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(muslim_api_http_request_duration_seconds_bucket{job=\"muslim-api\",route!=\"/\",route=~\"$route\"}[$__rate_interval])))",
+          "legendFormat": "p50",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(muslim_api_http_request_duration_seconds_bucket{job=\"muslim-api\",route!=\"/\",route=~\"$route\"}[$__rate_interval])))",
+          "legendFormat": "p95",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        },
+        {
+          "refId": "C",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(muslim_api_http_request_duration_seconds_bucket{job=\"muslim-api\",route!=\"/\",route=~\"$route\"}[$__rate_interval])))",
+          "legendFormat": "p99",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Traffic by endpoint",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (method, route) (rate(muslim_api_http_requests_total{job=\"muslim-api\",route!=\"/\",route=~\"$route\"}[$__rate_interval]))",
+          "legendFormat": "{{method}} {{route}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Traffic by status code",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (status) (rate(muslim_api_http_requests_total{job=\"muslim-api\",route!=\"/\",route=~\"$route\"}[$__rate_interval]))",
+          "legendFormat": "HTTP {{status}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Endpoint latency p95",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le, route) (rate(muslim_api_http_request_duration_seconds_bucket{job=\"muslim-api\",route!=\"/\",route=~\"$route\"}[$__rate_interval])))",
+          "legendFormat": "{{route}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "HTTP latency histogram",
+      "type": "heatmap",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (le) (rate(muslim_api_http_request_duration_seconds_bucket{job=\"muslim-api\",route!=\"/\",route=~\"$route\"}[$__rate_interval]))",
+          "legendFormat": "{{le}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "format": "heatmap"
+        }
+      ],
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "legend": {
+          "show": true
+        },
+        "yAxis": {
+          "unit": "s",
+          "min": "0"
+        },
+        "tooltip": {
+          "mode": "single",
+          "yHistogram": true
+        },
+        "color": {
+          "mode": "scheme",
+          "scheme": "Oranges"
+        }
+      },
+      "description": "Distribution of request durations over time. Health probes are excluded. Prometheus cumulative buckets are converted into interval buckets by the datasource."
+    },
+    {
+      "id": 10,
+      "title": "Function latency p95 by outcome",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le, function, outcome) (rate(muslim_api_function_duration_seconds_bucket{job=\"muslim-api\",function=~\"$function\"}[$__rate_interval])))",
+          "legendFormat": "{{function}} [{{outcome}}]",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Inclusive wall time, including awaited work. Nested function durations overlap; do not add them together."
+    },
+    {
+      "id": 11,
+      "title": "Function calls: success / error / cancelled",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (function, outcome) (rate(muslim_api_function_calls_total{job=\"muslim-api\",function=~\"$function\"}[$__rate_interval]))",
+          "legendFormat": "{{function}} [{{outcome}}]",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "title": "Function errors by type",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (function, type) (rate(muslim_api_function_errors_total{job=\"muslim-api\",function=~\"$function\"}[$__rate_interval]))",
+          "legendFormat": "{{function}} {{type}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Includes returned HTTP 4xx/5xx and expected validation exceptions as well as unexpected failures. Use HTTP 5xx to measure server failures."
+    },
+    {
+      "id": 13,
+      "title": "Request / response body size (mean)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(muslim_api_http_request_body_bytes_sum{job=\"muslim-api\",route=~\"$route\",route!=\"/\"}[$__rate_interval])) / clamp_min(sum(rate(muslim_api_http_request_body_bytes_count{job=\"muslim-api\",route=~\"$route\",route!=\"/\"}[$__rate_interval])), 1e-9)",
+          "legendFormat": "request",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(muslim_api_http_response_body_bytes_sum{job=\"muslim-api\",route=~\"$route\",route!=\"/\"}[$__rate_interval])) / clamp_min(sum(rate(muslim_api_http_response_body_bytes_count{job=\"muslim-api\",route=~\"$route\",route!=\"/\"}[$__rate_interval])), 1e-9)",
+          "legendFormat": "response",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "title": "Unhandled HTTP exceptions",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (route, type) (rate(muslim_api_http_exceptions_total{job=\"muslim-api\",route=~\"$route\"}[$__rate_interval]))",
+          "legendFormat": "{{route}} {{type}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "title": "Dorar latency p95",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 45
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le, outcome) (rate(muslim_api_external_request_duration_seconds_bucket{job=\"muslim-api\",service=\"dorar\"}[$__rate_interval])))",
+          "legendFormat": "{{outcome}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 16,
+      "title": "Dorar HTTP status / transport failures",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 45
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (status) (rate(muslim_api_external_requests_total{job=\"muslim-api\",service=\"dorar\"}[$__rate_interval]))",
+          "legendFormat": "{{status}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 17,
+      "title": "API resident memory",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 53
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "process_resident_memory_bytes{job=\"muslim-api\"}",
+          "legendFormat": "Resident memory",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 18,
+      "title": "API CPU usage (cores)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 53
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cores",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(process_cpu_seconds_total{job=\"muslim-api\"}[$__rate_interval])",
+          "legendFormat": "CPU cores",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Process CPU time per second. 1 means one fully used CPU core."
+    },
+    {
+      "id": 19,
+      "title": "Event-loop scheduling delay",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 61
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "muslim_api_event_loop_lag_seconds{job=\"muslim-api\"}",
+          "legendFormat": "Lag",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Sampled once per second. Long synchronous calculations, file reads or blocking outbound requests can increase this."
+    },
+    {
+      "id": 20,
+      "title": "Process uptime",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 61
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "time() - process_start_time_seconds{job=\"muslim-api\"}",
+          "legendFormat": "Uptime",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 21,
+      "title": "Python garbage collection",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 69
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (generation) (rate(python_gc_collections_total{job=\"muslim-api\"}[$__rate_interval]))",
+          "legendFormat": "Generation {{generation}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 22,
+      "title": "Open file descriptors",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 69
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "process_open_fds{job=\"muslim-api\"}",
+          "legendFormat": "Open",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "process_max_fds{job=\"muslim-api\"}",
+          "legendFormat": "Limit",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 23,
+      "title": "Active Prometheus alerts",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 77
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ALERTS{alertname=~\"MuslimAPI.*\",alertstate=\"firing\"}",
+          "legendFormat": "{{alertname}} {{route}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Rules are evaluated in Prometheus. Notifications require an Alertmanager or separately configured Grafana alerting contact points."
+    },
+    {
+      "id": 24,
+      "title": "Function duration histogram",
+      "type": "heatmap",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 85
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (le) (rate(muslim_api_function_duration_seconds_bucket{job=\"muslim-api\",function=~\"$function\"}[$__rate_interval]))",
+          "legendFormat": "{{le}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "format": "heatmap"
+        }
+      ],
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "legend": {
+          "show": true
+        },
+        "yAxis": {
+          "unit": "s",
+          "min": "0"
+        },
+        "tooltip": {
+          "mode": "single",
+          "yHistogram": true
+        },
+        "color": {
+          "mode": "scheme",
+          "scheme": "Oranges"
+        }
+      },
+      "description": "Use the Function selector to inspect a particular operation. Nested functions overlap; this distribution describes calls, not total request wall time."
+    },
+    {
+      "id": 25,
+      "title": "Dorar failures by type",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 85
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (type) (rate(muslim_api_external_errors_total{job=\"muslim-api\",service=\"dorar\"}[$__rate_interval]))",
+          "legendFormat": "{{type}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          }
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    }
+  ]
+}

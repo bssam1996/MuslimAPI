@@ -9,6 +9,9 @@ Use Docker Desktop in **Linux containers** mode on Windows. The mini PC needs
 Docker Engine and the Docker Compose plugin. GitHub Actions can publish the
 image to GitHub Container Registry (GHCR), ready for the mini PC to pull.
 
+For Prometheus and Grafana, see [MONITORING.md](MONITORING.md). The optional
+`compose.monitoring.yaml` starts both services with a dashboard and alert rules.
+
 ## Publish automatically to GHCR
 
 The workflow in [`.github/workflows/publish-image.yml`](.github/workflows/publish-image.yml)

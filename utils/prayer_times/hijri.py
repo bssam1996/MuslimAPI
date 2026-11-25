@@ -1,8 +1,10 @@
 """Hijri payload formatting for the initial HJCoSA-compatible API response."""
 
+
 from datetime import date as Date
 
 from hijridate import Gregorian
+from utils.metrics import metrics
 
 
 _HIJRI_WEEKDAYS = (
@@ -16,6 +18,7 @@ _HIJRI_WEEKDAYS = (
 )
 
 
+@metrics.track_function
 def hijri_payload(on_date: Date) -> dict:
     """Return the AlAdhan-shaped Hijri date fields needed by Muslim.
 

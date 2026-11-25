@@ -32,6 +32,20 @@ uvicorn main:app --reload
 The service is then available at `http://127.0.0.1:8000`. FastAPI's interactive
 OpenAPI documentation is available at `http://127.0.0.1:8000/docs`.
 
+## Run with Docker
+
+```sh
+docker build -t muslim-api:local .
+docker compose up -d
+```
+
+Compose reads `.env`; if it does not exist, copy `.env.docker.example` to `.env`
+first. Open `http://localhost:8000/docs`.
+
+GitHub Actions tests the image and publishes AMD64/ARM64 images to
+`ghcr.io/bssam1996/muslimapi` on pushes to `master` and version tags. See
+[DOCKER.md](DOCKER.md) for GHCR setup, hosting on a mini PC, and local builds.
+
 ## API overview
 
 | Endpoint | Description |

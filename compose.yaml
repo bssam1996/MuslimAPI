@@ -1,0 +1,23 @@
+name: muslim-api
+
+services:
+  api:
+    image: ${MUSLIM_API_IMAGE:-muslim-api:local}
+    env_file:
+      - .env
+    ports:
+      - "${BIND_ADDRESS:-0.0.0.0}:${PORT:-8000}:8000"
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

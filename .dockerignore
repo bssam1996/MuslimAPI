@@ -1,0 +1,25 @@
+# Send only the files required by the Dockerfile to the builder.
+*
+!Dockerfile
+!.dockerignore
+!requirements.txt
+!main.py
+!routes/
+!routes/**
+!utils/
+!utils/**
+!data/
+!data/hadith/
+!data/hadith/**
+!data/quizes/
+!data/quizes/**
+!data/prayer_times/
+!data/prayer_times/**
+!THIRD_PARTY_NOTICES.md
+**/__pycache__/
+**/*.py[cod]
+**/.env*
+**/*.sqlite*
+**/*.db
+**/*.pem
+**/*.key
